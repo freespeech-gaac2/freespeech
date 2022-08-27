@@ -34,7 +34,7 @@
     "@ffmpeg/core": "^0.11.0",
     "@ffmpeg/ffmpeg": "^0.11.3",
     "@gamestdio/websocket": "^0.3.2",
-    "@github/webauthn-json": "^0.5.7",
+    "@github/webauthn-json": "^2.0.0",
     "@rails/ujs": "^6.1.6",
     "array-includes": "^3.1.5",
     "arrow-key-navigation": "^1.2.0",
