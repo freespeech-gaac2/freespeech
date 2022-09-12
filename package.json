@@ -32,7 +32,7 @@
     "@babel/preset-react": "^7.17.12",
     "@babel/runtime": "^7.18.0",
     "@ffmpeg/core": "^0.11.0",
-    "@ffmpeg/ffmpeg": "^0.11.3",
+    "@ffmpeg/ffmpeg": "^0.11.5",
     "@gamestdio/websocket": "^0.3.2",
     "@github/webauthn-json": "^0.5.7",
     "@rails/ujs": "^6.1.6",
