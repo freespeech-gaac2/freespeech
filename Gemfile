@@ -154,5 +154,5 @@ gem 'connection_pool', require: false
 
 gem 'xorcist', '~> 1.1'
 
-gem 'jwt', '~> 2.2'
+gem 'jwt', '~> 2.5'
 gem 'google-apis-androidpublisher_v3', '~> 0.31.0'
