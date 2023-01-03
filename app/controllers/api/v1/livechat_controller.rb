@@ -22,11 +22,7 @@ class Api::V1::LivechatController < Api::BaseController
     response = @firebase.push('room', room)
     if response.code == 200
       roomId = response.body['name']
-      room['key'] = roomId
-      room['stream_name'] = generateStreamName roomId
-      room['m3u8_pull_url'] = generateM3u8PullStreamUrl roomId
-      room['rtmp_pull_url'] = generateRtmpPullStreamUrl roomId
-      response = @firebase.update("room/#{roomId}", room)
+      room[:key] = roomId
     end
     render json: room, status: response.code
   end
@@ -182,6 +178,7 @@ class Api::V1::LivechatController < Api::BaseController
     if response.code == 200
       if response.body.values.length > 0
         room = response.body.values[0]
+        room[:key] = response.body.keys[0]
         render json: room, status: response.code
       else
         render json: { error: 'no room' }, status: 404

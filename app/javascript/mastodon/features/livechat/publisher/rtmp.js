@@ -64,7 +64,10 @@ class LivechatRTMP extends React.Component {
     this.initFirebase();
     window.addEventListener('beforeunload', this.beforeunloadpage);
     this.props.dispatch(getPushStreamUrl(this.props.params.roomId, (data)=>{
-      this.setState({ rtmp_push_url: data.push_stream_url });
+      this.setState({ rtmp_push_url: data.push_stream_url, m3u8_pull_url: data.m3u8_pull_url });
+      this.hlsFetchCount=0;
+      this.hlsFetchOKCount = 0;
+      this.checkHlsAvailable();
     }));
   }
 
@@ -138,10 +141,6 @@ class LivechatRTMP extends React.Component {
           this.props.dispatch(setTitle(this.props.params.roomId, title, description, thumbnail, thumbnail_id, status_id)); // firebase to redux store
         }
 
-        if (!this.state.player_initialized && !end_at) {
-          this.checkHlsAvailable(m3u8_pull_url);
-        }
-
         if (this.state.player_initialized && published_at && end_at) {
           queueMicrotask(() => {
             this.stopHlsClient();
@@ -168,34 +167,40 @@ class LivechatRTMP extends React.Component {
     }
   }
 
-  checkHlsAvailable = (m3u8_pull_url) => {
+  checkHlsAvailable = () => {
     if (this.hlsFetching) {
       return;
     }
-    console.log("hls fetching", m3u8_pull_url);
     this.hlsFetching = true;
-    fetch(m3u8_pull_url)
+    this.hlsFetchCount++;
+    fetch(this.state.m3u8_pull_url)
     .then(
       (result) => {
         this.hlsFetching = false;
-        if(result.status==200){
-          console.log("hlsCheckOK", result);
-          if(this.hlsCheckInterval){
-            clearInterval(this.hlsCheckInterval);
-            this.hlsCheckInterval = null;
+        if(result.status==200){ // 最初の1回目でエラーなく成功した場合は即再生開始
+          if(this.hlsFetchCount==1){
+            this.initHlsClient(this.state.m3u8_pull_url);
+            return;
           }
-          this.initHlsClient(m3u8_pull_url);
+          this.hlsFetchOKCount++;
+          if(this.hlsFetchOKCount>=3){ // エラー後に成功した場合は複数回チェックしてから再生開始
+            if(this.hlsCheckInterval){
+              clearInterval(this.hlsCheckInterval);
+              this.hlsCheckInterval = null;
+            }
+            this.initHlsClient(this.state.m3u8_pull_url);
+          }
         }else{
-          console.log("hlsCheckNG " + result.status + ' ' + result.statusText);
+          this.hlsFetchOKCount = 0;
           if(!this.hlsCheckInterval){
-            console.log("set hlsCheckInterval");
             this.hlsCheckInterval = setInterval(() => {
-              this.checkHlsAvailable(m3u8_pull_url);
+              this.checkHlsAvailable();
             }, 5 * 1000);
           }
         }
       },
       (error) => {
+        this.hlsFetching = false;
         console.log("hlsCheckError", error);
       }
     )
@@ -204,8 +209,10 @@ class LivechatRTMP extends React.Component {
   initHlsClient = (m3u8_pull_url) => {
     if (this.videoDom) {
       if (Hls.isSupported()) {
-        // fallback to hls.js
         this.hls = new Hls();
+        this.hls.on(Hls.Events.ERROR, function (event, data) {
+          console.error("hls.js error", data);
+        });
         this.hls.loadSource(m3u8_pull_url);
         this.hls.attachMedia(this.videoDom);
         this.setState({ m3u8_supported: true, player_initialized: true });
@@ -217,15 +224,17 @@ class LivechatRTMP extends React.Component {
 
   stopHlsClient = () => {
     if (this.videoDom) {
-      if (this.videoDom.canPlayType('application/vnd.apple.mpegurl')) {
-        // native HLS support
-        this.videoDom.src = null;
-        this.setState({ player_initialized: false });
-      } else if (Hls.isSupported()) {
-        // fallback to hls.js
+      if (Hls.isSupported()) {
         this.hls.destroy();
         this.setState({ player_initialized: false });
       }
+    }
+  }
+
+  onReloadHlsClient = () => {
+    if(this.hls){
+      this.stopHlsClient();
+      this.initHlsClient(this.state.m3u8_pull_url);
     }
   }
 
@@ -336,7 +345,11 @@ class LivechatRTMP extends React.Component {
           <div className='player'><video className='video' ref={this.setVideoDom} controls autoPlay muted playsInline /></div>
           {(!this.state.player_initialized) && <div>配信待ち</div>}
           <div className='row marTopSmall'>
-            {this.state.player_initialized && <Button onClick={this.onScreenshot} className='buttonSmall marRightSmall'><Icon id='camera' />&nbsp;スクショ保存</Button>}
+            {this.state.player_initialized && 
+            <>
+            <Button onClick={this.onScreenshot} className='buttonSmall marRightSmall'><Icon id='camera' />&nbsp;スクショ保存</Button>
+            <Button onClick={this.onReloadHlsClient} className='buttonSmall marRightSmall'><Icon id='refresh' />&nbsp;プレイヤー再読込</Button>
+            </>}
           </div>
           <div className='separator' />
           <div className='marTopSmall row'>
