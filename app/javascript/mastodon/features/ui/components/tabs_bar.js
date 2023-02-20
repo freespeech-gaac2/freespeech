@@ -11,7 +11,7 @@ export const links = [
   <NavLink className='tabs-bar__link' to='/home' data-preview-title-id='column.home' data-preview-icon='home' ><Icon id='home' fixedWidth /><FormattedMessage id='tabs_bar.home' defaultMessage='Home' /></NavLink>,
   <NavLink className='tabs-bar__link' to='/notifications' data-preview-title-id='column.notifications' data-preview-icon='bell' ><NotificationsCounterIcon /><FormattedMessage id='tabs_bar.notifications' defaultMessage='Notifications' /></NavLink>,
   <NavLink className='tabs-bar__link' to='/public/local' data-preview-title-id='column.community' data-preview-icon='users' ><Icon id='users' fixedWidth /><FormattedMessage id='tabs_bar.local_timeline' defaultMessage='Local' /></NavLink>,
-  // <NavLink className='tabs-bar__link' to='/livechat' data-preview-title-id='column.livechat' data-preview-icon='address-card' ><Icon id='address-card' fixedWidth /><FormattedMessage id='tabs_bar.livechat' defaultMessage='LiveChat' /></NavLink>,
+  <NavLink className='tabs-bar__link' to='/livechat' data-preview-title-id='column.livechat' data-preview-icon='address-card' ><Icon id='address-card' fixedWidth /><FormattedMessage id='tabs_bar.livechat' defaultMessage='LiveChat' /></NavLink>,
   <NavLink className='tabs-bar__link optional' to='/explore' data-preview-title-id='tabs_bar.search' data-preview-icon='search' ><Icon id='search' fixedWidth /><FormattedMessage id='tabs_bar.search' defaultMessage='Search' /></NavLink>,
   <NavLink className='tabs-bar__link' style={{ flexGrow: '0', flexBasis: '30px' }} to='/getting-started' data-preview-title-id='getting_started.heading' data-preview-icon='bars' ><Icon id='bars' fixedWidth /></NavLink>,
 ];
